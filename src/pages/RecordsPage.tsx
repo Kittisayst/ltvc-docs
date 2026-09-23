@@ -1,6 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link, useParams } from 'react-router-dom'
+import {
+  Button,
+  Input,
+  Popconfirm,
+  Space,
+  Table,
+  Tag,
+  Typography,
+} from 'antd'
+import { PlusOutlined, PrinterOutlined, SearchOutlined } from '@ant-design/icons'
 import { db, saveRecord, deleteRecord as removeRecordFromDb } from '../lib/db'
 import { createDraftRecord, filterRecords, markPrinted } from '../lib/records'
 import { ensureFontRegistered } from '../lib/fonts'
@@ -53,7 +63,7 @@ export default function RecordsPage() {
     return () => window.removeEventListener('afterprint', handleAfterPrint)
   }, [])
 
-  if (!template || !records) return <div className="page">ກຳລັງໂຫຼດ...</div>
+  if (!template || !records) return <div className="p-6">ກຳລັງໂຫຼດ...</div>
 
   const filtered = filterRecords(records, query)
 
@@ -79,7 +89,6 @@ export default function RecordsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('ລຶບລາຍການນີ້?')) return
     await removeRecordFromDb(id)
   }
 
@@ -92,92 +101,95 @@ export default function RecordsPage() {
     setPrintQueue(filtered)
   }
 
-  return (
-    <div className="page">
-      <div className="toolbar">
-        <Link to="/">← ແບບຟອມທັງໝົດ</Link>
-        <h1>{template.name}</h1>
-      </div>
+  const columns = [
+    ...template.fields.map((f) => ({
+      title: f.label,
+      dataIndex: ['values', f.id],
+      key: f.id,
+    })),
+    {
+      title: 'ສະຖານະ',
+      key: 'status',
+      render: (_: unknown, r: CertRecord) =>
+        r.status === 'printed' ? <Tag color="green">ພິມແລ້ວ</Tag> : <Tag>ຮ່າງ</Tag>,
+    },
+    {
+      title: '',
+      key: 'actions',
+      render: (_: unknown, r: CertRecord) => (
+        <Space>
+          <Button size="small" icon={<PrinterOutlined />} onClick={() => handlePrintOne(r)}>
+            ພິມ
+          </Button>
+          <Button size="small" onClick={() => handleEdit(r)}>
+            ແກ້ໄຂ
+          </Button>
+          <Popconfirm title="ລຶບລາຍການນີ້?" okText="ລຶບ" cancelText="ຍົກເລີກ" onConfirm={() => handleDelete(r.id)}>
+            <Button size="small" danger>
+              ລຶບ
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ]
 
-      <div className="record-form">
-        <h2>{editingId ? 'ແກ້ໄຂລາຍການ' : 'ຕື່ມຂໍ້ມູນໃໝ່'}</h2>
+  return (
+    <div className="mx-auto max-w-6xl p-6">
+      <Space className="mb-2">
+        <Link to="/">← ແບບຟອມທັງໝົດ</Link>
+      </Space>
+      <Typography.Title level={2}>{template.name}</Typography.Title>
+
+      <div className="mb-4 flex flex-col gap-3 rounded-lg border border-gray-200 p-4">
+        <Typography.Title level={4} className="m-0!">
+          {editingId ? 'ແກ້ໄຂລາຍການ' : 'ຕື່ມຂໍ້ມູນໃໝ່'}
+        </Typography.Title>
         {template.fields.map((field) => (
-          <label key={field.id}>
+          <label key={field.id} className="flex flex-col gap-1 text-sm">
             {field.label}
-            <input
+            <Input
               value={formValues[field.id] ?? ''}
               onChange={(e) => handleFieldInput(field.id, e.target.value)}
             />
           </label>
         ))}
-        <div className="toolbar">
-          <button type="button" onClick={handleSaveRecord}>
-            {editingId ? 'ບັນທຶກການແກ້ໄຂ' : '+ ເພີ່ມລາຍການ'}
-          </button>
+        <Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleSaveRecord}>
+            {editingId ? 'ບັນທຶກການແກ້ໄຂ' : 'ເພີ່ມລາຍການ'}
+          </Button>
           {editingId && (
-            <button
-              type="button"
+            <Button
               onClick={() => {
                 setEditingId(null)
                 setFormValues({})
               }}
             >
               ຍົກເລີກ
-            </button>
+            </Button>
           )}
-        </div>
+        </Space>
       </div>
 
-      <div className="toolbar">
-        <input
+      <Space className="mb-4" wrap>
+        <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="ຄົ້ນຫາ (ຊື່, ເລກທີ, ...)"
+          prefix={<SearchOutlined />}
+          className="w-64"
         />
-        <button type="button" onClick={handlePrintAll}>
+        <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrintAll}>
           ພິມທັງໝົດ ({filtered.length})
-        </button>
-      </div>
+        </Button>
+      </Space>
 
-      <table className="record-table">
-        <thead>
-          <tr>
-            {template.fields.map((f) => (
-              <th key={f.id}>{f.label}</th>
-            ))}
-            <th>ສະຖານະ</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((r) => (
-            <tr key={r.id}>
-              {template.fields.map((f) => (
-                <td key={f.id}>{r.values[f.id]}</td>
-              ))}
-              <td>{r.status === 'printed' ? 'ພິມແລ້ວ' : 'ຮ່າງ'}</td>
-              <td className="row-actions">
-                <button type="button" onClick={() => handlePrintOne(r)}>
-                  ພິມ
-                </button>
-                <button type="button" onClick={() => handleEdit(r)}>
-                  ແກ້ໄຂ
-                </button>
-                <button type="button" onClick={() => handleDelete(r.id)}>
-                  ລຶບ
-                </button>
-              </td>
-            </tr>
-          ))}
-          {filtered.length === 0 && (
-            <tr>
-              <td colSpan={template.fields.length + 2} className="empty">
-                ບໍ່ມີລາຍການ
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      <Table
+        rowKey="id"
+        columns={columns}
+        dataSource={filtered}
+        pagination={false}
+      />
 
       {printQueue && (
         <PrintSheets template={template} records={printQueue} fontFamilies={fontFamilies} />

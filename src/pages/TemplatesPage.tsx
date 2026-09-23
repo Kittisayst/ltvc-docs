@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link } from 'react-router-dom'
+import { Button, Empty, Input, List, Modal, Space, Typography, message } from 'antd'
+import { DeleteOutlined, DownloadOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { createTemplate, db, deleteTemplate } from '../lib/db'
 import { exportBackup, importBackup } from '../lib/backup'
 
@@ -15,9 +17,15 @@ export default function TemplatesPage() {
     setNewName('')
   }
 
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`ລຶບແບບຟອມ "${name}" ແລະ ປະຫວັດການພິມທັງໝົດຂອງມັນ?`)) return
-    await deleteTemplate(id)
+  function handleDelete(id: string, name: string) {
+    Modal.confirm({
+      title: `ລຶບແບບຟອມ "${name}"?`,
+      content: 'ປະຫວັດການພິມທັງໝົດຂອງແບບຟອມນີ້ຈະຖືກລຶບໄປນຳ.',
+      okText: 'ລຶບ',
+      okButtonProps: { danger: true },
+      cancelText: 'ຍົກເລີກ',
+      onOk: () => deleteTemplate(id),
+    })
   }
 
   async function handleExport() {
@@ -37,47 +45,63 @@ export default function TemplatesPage() {
     if (!file) return
     const text = await file.text()
     await importBackup(text)
+    message.success('ນຳເຂົ້າ backup ສຳເລັດ')
   }
 
   return (
-    <div className="page">
-      <h1>ແບບຟອມໃບຍ້ອງຍໍ</h1>
+    <div className="mx-auto max-w-3xl p-6">
+      <Typography.Title level={2}>ແບບຟອມໃບຍ້ອງຍໍ</Typography.Title>
 
-      <div className="toolbar">
-        <input
+      <Space.Compact className="mb-4 w-full max-w-md">
+        <Input
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="ຊື່ແບບຟອມໃໝ່"
-          onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+          onPressEnter={handleCreate}
         />
-        <button type="button" onClick={handleCreate}>
-          + ສ້າງແບບຟອມ
-        </button>
-      </div>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+          ສ້າງແບບຟອມ
+        </Button>
+      </Space.Compact>
 
-      <ul className="template-list">
-        {templates?.map((t) => (
-          <li key={t.id}>
-            <span className="template-name">{t.name}</span>
-            <Link to={`/templates/${t.id}/edit`}>ອອກແບບ</Link>
-            <Link to={`/templates/${t.id}/records`}>ຕື່ມຂໍ້ມູນ/ພິມ</Link>
-            <button type="button" onClick={() => handleDelete(t.id, t.name)}>
-              ລຶບ
-            </button>
-          </li>
-        ))}
-        {templates?.length === 0 && <li className="empty">ຍັງບໍ່ມີແບບຟອມ</li>}
-      </ul>
+      <List
+        bordered
+        dataSource={templates ?? []}
+        locale={{ emptyText: <Empty description="ຍັງບໍ່ມີແບບຟອມ" /> }}
+        renderItem={(t) => (
+          <List.Item
+            actions={[
+              <Link key="edit" to={`/templates/${t.id}/edit`}>
+                ອອກແບບ
+              </Link>,
+              <Link key="records" to={`/templates/${t.id}/records`}>
+                ຕື່ມຂໍ້ມູນ/ພິມ
+              </Link>,
+              <Button
+                key="delete"
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={() => handleDelete(t.id, t.name)}
+              />,
+            ]}
+          >
+            <span className="font-medium">{t.name}</span>
+          </List.Item>
+        )}
+      />
 
-      <div className="toolbar">
-        <button type="button" onClick={handleExport}>
+      <Space className="mt-6">
+        <Button icon={<DownloadOutlined />} onClick={handleExport}>
           ສົ່ງອອກ backup (JSON)
-        </button>
-        <label className="import-label">
-          ນຳເຂົ້າ backup
-          <input type="file" accept="application/json" onChange={handleImport} hidden />
-        </label>
-      </div>
+        </Button>
+        <Button icon={<UploadOutlined />}>
+          <label className="cursor-pointer">
+            ນຳເຂົ້າ backup
+            <input type="file" accept="application/json" onChange={handleImport} hidden />
+          </label>
+        </Button>
+      </Space>
     </div>
   )
 }

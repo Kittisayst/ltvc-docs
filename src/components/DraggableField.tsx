@@ -49,7 +49,9 @@ export default function DraggableField({
 
   return (
     <div
-      className={`draggable-field${selected ? ' selected' : ''}`}
+      className={`absolute cursor-move touch-none select-none whitespace-nowrap border px-1 py-0.5 text-black ${
+        selected ? 'border-dashed border-blue-500 bg-blue-50' : 'border-transparent'
+      }`}
       style={{
         left: mmToPx(field.xMm, pxPerMm),
         top: mmToPx(field.yMm, pxPerMm),

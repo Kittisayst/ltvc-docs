@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link, useParams } from 'react-router-dom'
+import {
+  Button,
+  Input,
+  InputNumber,
+  Select,
+  Space,
+  Typography,
+  message,
+} from 'antd'
+import { PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { db, saveTemplate, addFont } from '../lib/db'
 import { addField, moveField, removeField, updateField } from '../lib/fieldOps'
 import { ensureFontRegistered } from '../lib/fonts'
@@ -50,7 +60,7 @@ export default function TemplateEditorPage() {
     })
   }, [fonts])
 
-  if (!template) return <div className="page">ກຳລັງໂຫຼດ...</div>
+  if (!template) return <div className="p-6">ກຳລັງໂຫຼດ...</div>
 
   async function handleReferenceImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -65,6 +75,7 @@ export default function TemplateEditorPage() {
     if (!file) return
     const format = file.name.split('.').pop() ?? 'opentype'
     await addFont(file.name, file, format)
+    message.success(`ອັບໂຫລດຟອນ "${file.name}" ສຳເລັດ`)
   }
 
   async function handleAddField() {
@@ -80,7 +91,10 @@ export default function TemplateEditorPage() {
     await saveTemplate({ ...template, fields: moveField(template.fields, fieldId, xMm, yMm) })
   }
 
-  async function handleFieldPatch(fieldId: string, patch: Partial<{ label: string; fontSizePt: number; align: Align; fontId: string | null }>) {
+  async function handleFieldPatch(
+    fieldId: string,
+    patch: Partial<{ label: string; fontSizePt: number; align: Align; fontId: string | null }>,
+  ) {
     if (!template) return
     await saveTemplate({ ...template, fields: updateField(template.fields, fieldId, patch) })
   }
@@ -94,30 +108,39 @@ export default function TemplateEditorPage() {
   const selectedField = template.fields.find((f) => f.id === selectedFieldId) ?? null
 
   return (
-    <div className="page editor-page">
-      <div className="toolbar">
+    <div className="mx-auto max-w-6xl p-6">
+      <Space className="mb-2">
         <Link to="/">← ແບບຟອມທັງໝົດ</Link>
-        <h1>{template.name}</h1>
-      </div>
+      </Space>
+      <Typography.Title level={2}>{template.name}</Typography.Title>
 
-      <div className="toolbar">
-        <label className="import-label">
-          ອັບໂຫລດຮູບຮ່າງອ້າງອີງ
-          <input type="file" accept="image/*" onChange={handleReferenceImage} hidden />
-        </label>
-        <label className="import-label">
-          ອັບໂຫລດຟອນ
-          <input type="file" accept=".ttf,.otf,.woff,.woff2" onChange={handleFontUpload} hidden />
-        </label>
-        <button type="button" onClick={handleAddField}>
-          + ເພີ່ມຊ່ອງຂໍ້ມູນ
-        </button>
-      </div>
+      <Space wrap className="mb-4">
+        <Button icon={<UploadOutlined />}>
+          <label className="cursor-pointer">
+            ອັບໂຫລດຮູບຮ່າງອ້າງອີງ
+            <input type="file" accept="image/*" onChange={handleReferenceImage} hidden />
+          </label>
+        </Button>
+        <Button icon={<UploadOutlined />}>
+          <label className="cursor-pointer">
+            ອັບໂຫລດຟອນ
+            <input
+              type="file"
+              accept=".ttf,.otf,.woff,.woff2"
+              onChange={handleFontUpload}
+              hidden
+            />
+          </label>
+        </Button>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleAddField}>
+          ເພີ່ມຊ່ອງຂໍ້ມູນ
+        </Button>
+      </Space>
 
-      <div className="editor-body">
+      <div className="flex flex-wrap items-start gap-6">
         <div
           ref={pageRef}
-          className="page-canvas"
+          className="relative w-[min(70vw,900px)] shrink-0 border border-gray-300 bg-white bg-cover bg-no-repeat"
           style={{
             aspectRatio: `${PAGE_WIDTH_MM} / ${PAGE_HEIGHT_MM}`,
             backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
@@ -136,74 +159,73 @@ export default function TemplateEditorPage() {
           ))}
         </div>
 
-        <div className="field-panel">
-          <h2>ຊ່ອງຂໍ້ມູນ</h2>
-          <ul className="field-list">
+        <div className="w-70 shrink-0">
+          <Typography.Title level={4}>ຊ່ອງຂໍ້ມູນ</Typography.Title>
+          <ul className="mb-4 list-none p-0">
             {template.fields.map((f) => (
-              <li key={f.id} className={f.id === selectedFieldId ? 'selected' : ''}>
-                <button type="button" onClick={() => setSelectedFieldId(f.id)}>
+              <li key={f.id} className="mb-1 flex gap-1">
+                <Button
+                  type={f.id === selectedFieldId ? 'default' : 'text'}
+                  className="grow text-left! justify-start!"
+                  onClick={() => setSelectedFieldId(f.id)}
+                >
                   {f.label}
-                </button>
-                <button type="button" onClick={() => handleRemoveField(f.id)}>
+                </Button>
+                <Button danger type="text" onClick={() => handleRemoveField(f.id)}>
                   ລຶບ
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
 
           {selectedField && (
-            <div className="field-settings">
-              <label>
+            <div className="flex flex-col gap-3 border-t border-gray-200 pt-3 text-sm">
+              <label className="flex flex-col gap-1">
                 ປ້າຍຊື່
-                <input
+                <Input
                   value={selectedField.label}
                   onChange={(e) => handleFieldPatch(selectedField.id, { label: e.target.value })}
                 />
               </label>
-              <label>
+              <label className="flex flex-col gap-1">
                 ຂະໜາດຕົວອັກສອນ (pt)
-                <input
-                  type="number"
+                <InputNumber
+                  className="w-full"
                   min={6}
                   max={72}
                   value={selectedField.fontSizePt}
-                  onChange={(e) =>
-                    handleFieldPatch(selectedField.id, { fontSizePt: Number(e.target.value) })
+                  onChange={(v) =>
+                    v != null && handleFieldPatch(selectedField.id, { fontSizePt: v })
                   }
                 />
               </label>
-              <label>
+              <label className="flex flex-col gap-1">
                 ການຈັດວາງ
-                <select
+                <Select
                   value={selectedField.align}
-                  onChange={(e) =>
-                    handleFieldPatch(selectedField.id, { align: e.target.value as Align })
-                  }
-                >
-                  <option value="left">ຊ້າຍ</option>
-                  <option value="center">ກາງ</option>
-                  <option value="right">ຂວາ</option>
-                </select>
+                  onChange={(v) => handleFieldPatch(selectedField.id, { align: v })}
+                  options={[
+                    { value: 'left', label: 'ຊ້າຍ' },
+                    { value: 'center', label: 'ກາງ' },
+                    { value: 'right', label: 'ຂວາ' },
+                  ]}
+                />
               </label>
-              <label>
+              <label className="flex flex-col gap-1">
                 ຟອນ
-                <select
+                <Select
                   value={selectedField.fontId ?? ''}
-                  onChange={(e) =>
-                    handleFieldPatch(selectedField.id, { fontId: e.target.value || null })
-                  }
-                >
-                  <option value="">(ຟອນມາດຕະຖານ)</option>
-                  {fonts?.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => handleFieldPatch(selectedField.id, { fontId: v || null })}
+                  options={[
+                    { value: '', label: '(ຟອນມາດຕະຖານ)' },
+                    ...(fonts?.map((f) => ({ value: f.id, label: f.name })) ?? []),
+                  ]}
+                />
               </label>
-              <p className="hint">
-                ຕຳແໜ່ງ: {selectedField.xMm.toFixed(1)}mm, {selectedField.yMm.toFixed(1)}mm — ລາກຂໍ້ຄວາມເທິງຮູບເພື່ອຍ້າຍ
-              </p>
+              <Typography.Text type="secondary">
+                ຕຳແໜ່ງ: {selectedField.xMm.toFixed(1)}mm, {selectedField.yMm.toFixed(1)}mm — ລາກ
+                ຂໍ້ຄວາມເທິງຮູບເພື່ອຍ້າຍ
+              </Typography.Text>
             </div>
           )}
         </div>
