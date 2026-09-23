@@ -1,5 +1,9 @@
 import type { FontAsset } from './types'
 
+// Bundled at public/fonts/PhetsarathOT.ttf and registered via @font-face
+// in index.css — the default for any field that has no uploaded font.
+export const DEFAULT_FONT_FAMILY = "'Phetsarath OT', sans-serif"
+
 const registered = new Set<string>()
 
 export function fontFamilyFor(font: FontAsset): string {

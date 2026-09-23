@@ -1,7 +1,14 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Phetsarath OT';
+  src: url('/fonts/PhetsarathOT.ttf') format('truetype');
+  font-display: swap;
+}
+
 body {
   margin: 0;
+  font-family: 'Phetsarath OT', sans-serif;
 }
 
 @page {

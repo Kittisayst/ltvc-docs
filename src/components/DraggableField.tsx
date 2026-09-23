@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import type { FieldDef } from '../lib/types'
+import { DEFAULT_FONT_FAMILY } from '../lib/fonts'
 import { clampToPage, mmToPx, pxToMm } from '../lib/units'
 
 interface Props {
@@ -57,7 +58,7 @@ export default function DraggableField({
         top: mmToPx(field.yMm, pxPerMm),
         fontSize: field.fontSizePt,
         textAlign: field.align,
-        fontFamily: fontFamily ?? undefined,
+        fontFamily: fontFamily ?? DEFAULT_FONT_FAMILY,
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

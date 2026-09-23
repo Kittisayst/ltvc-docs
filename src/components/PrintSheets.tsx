@@ -1,3 +1,4 @@
+import { DEFAULT_FONT_FAMILY } from '../lib/fonts'
 import type { CertRecord, Template } from '../lib/types'
 
 interface Props {
@@ -20,7 +21,7 @@ export default function PrintSheets({ template, records, fontFamilies }: Props) 
                 top: `${field.yMm}mm`,
                 fontSize: `${field.fontSizePt}pt`,
                 textAlign: field.align,
-                fontFamily: field.fontId ? fontFamilies[field.fontId] : undefined,
+                fontFamily: field.fontId ? fontFamilies[field.fontId] : DEFAULT_FONT_FAMILY,
               }}
             >
               {record.values[field.id] ?? ''}

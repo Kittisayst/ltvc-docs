@@ -240,7 +240,7 @@ export default function TemplateEditorPage() {
                   value={selectedField.fontId ?? ''}
                   onChange={(v) => handleFieldPatch(selectedField.id, { fontId: v || null })}
                   options={[
-                    { value: '', label: '(ຟອນມາດຕະຖານ)' },
+                    { value: '', label: '(ຟອນມາດຕະຖານ — Phetsarath OT)' },
                     ...(fonts?.map((f) => ({ value: f.id, label: f.name })) ?? []),
                   ]}
                 />
