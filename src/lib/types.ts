@@ -14,6 +14,13 @@ export interface FieldDef {
    * printing reads straight from here instead of the Record's values.
    */
   staticValue: string | null
+  /**
+   * Explicit box size in mm. Null means auto: width shrinks to fit the
+   * text (capped at the remaining page width) and height grows with it.
+   * Set, they pin the field to a fixed box (and clip overflow) instead.
+   */
+  widthMm: number | null
+  heightMm: number | null
 }
 
 export interface Template {

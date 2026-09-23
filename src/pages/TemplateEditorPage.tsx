@@ -120,6 +120,8 @@ export default function TemplateEditorPage() {
       align: Align
       fontId: string | null
       staticValue: string | null
+      widthMm: number | null
+      heightMm: number | null
     }>,
   ) {
     if (!template) return
@@ -301,8 +303,34 @@ export default function TemplateEditorPage() {
                   />
                 </label>
               </div>
+              <div className="flex gap-2">
+                <label className="flex flex-col gap-1 grow">
+                  ຄວາມກວ້າງ (mm)
+                  <InputNumber
+                    className="w-full"
+                    min={1}
+                    max={PAGE_WIDTH_MM}
+                    step={0.5}
+                    placeholder="ອັດຕະໂນມັດ"
+                    value={selectedField.widthMm}
+                    onChange={(v) => handleFieldPatch(selectedField.id, { widthMm: v })}
+                  />
+                </label>
+                <label className="flex flex-col gap-1 grow">
+                  ຄວາມສູງ (mm)
+                  <InputNumber
+                    className="w-full"
+                    min={1}
+                    max={PAGE_HEIGHT_MM}
+                    step={0.5}
+                    placeholder="ອັດຕະໂນມັດ"
+                    value={selectedField.heightMm}
+                    onChange={(v) => handleFieldPatch(selectedField.id, { heightMm: v })}
+                  />
+                </label>
+              </div>
               <Typography.Text type="secondary">
-                ລາກຂໍ້ຄວາມເທິງຮູບເພື່ອຍ້າຍ, ຫຼືພິມຕຳແໜ່ງເອງຂ້າງເທິງ
+                ປ່ອຍຄວາມກວ້າງ/ສູງໃຫ້ຫວ່າງເພື່ອອັດຕະໂນມັດຕາມຂໍ້ຄວາມ. ລາກຂໍ້ຄວາມເທິງຮູບເພື່ອຍ້າຍ, ຫຼືພິມຕຳແໜ່ງເອງຂ້າງເທິງ
               </Typography.Text>
             </div>
           )}

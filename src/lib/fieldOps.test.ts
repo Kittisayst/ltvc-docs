@@ -12,6 +12,8 @@ function makeField(overrides: Partial<FieldDef> = {}): FieldDef {
     fontSizePt: 12,
     align: 'left',
     staticValue: null,
+    widthMm: null,
+    heightMm: null,
     ...overrides,
   }
 }

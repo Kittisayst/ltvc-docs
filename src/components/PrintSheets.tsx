@@ -1,5 +1,5 @@
 import { DEFAULT_FONT_FAMILY } from '../lib/fonts'
-import { remainingWidthMm } from '../lib/units'
+import { fieldBoxWidthMm } from '../lib/units'
 import type { CertRecord, Template } from '../lib/types'
 
 interface Props {
@@ -20,7 +20,10 @@ export default function PrintSheets({ template, records, fontFamilies }: Props) 
               style={{
                 left: `${field.xMm}mm`,
                 top: `${field.yMm}mm`,
-                maxWidth: `${remainingWidthMm(field.xMm)}mm`,
+                maxWidth: `${fieldBoxWidthMm(field.xMm, field.widthMm)}mm`,
+                width: field.widthMm != null ? `${field.widthMm}mm` : undefined,
+                height: field.heightMm != null ? `${field.heightMm}mm` : undefined,
+                overflow: field.widthMm != null || field.heightMm != null ? 'hidden' : undefined,
                 whiteSpace: 'pre-wrap',
                 fontSize: `${field.fontSizePt}pt`,
                 textAlign: field.align,

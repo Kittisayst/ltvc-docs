@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import type { FieldDef } from '../lib/types'
 import { DEFAULT_FONT_FAMILY } from '../lib/fonts'
-import { clampToPage, mmToPx, pxToMm, remainingWidthMm } from '../lib/units'
+import { clampToPage, fieldBoxWidthMm, mmToPx, pxToMm } from '../lib/units'
 
 interface Props {
   field: FieldDef
@@ -56,7 +56,10 @@ export default function DraggableField({
       style={{
         left: mmToPx(field.xMm, pxPerMm),
         top: mmToPx(field.yMm, pxPerMm),
-        maxWidth: mmToPx(remainingWidthMm(field.xMm), pxPerMm),
+        maxWidth: mmToPx(fieldBoxWidthMm(field.xMm, field.widthMm), pxPerMm),
+        width: field.widthMm != null ? mmToPx(field.widthMm, pxPerMm) : undefined,
+        height: field.heightMm != null ? mmToPx(field.heightMm, pxPerMm) : undefined,
+        overflow: field.widthMm != null || field.heightMm != null ? 'hidden' : undefined,
         fontSize: field.fontSizePt,
         textAlign: field.align,
         fontFamily: fontFamily ?? DEFAULT_FONT_FAMILY,

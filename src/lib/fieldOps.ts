@@ -11,6 +11,8 @@ export function addField(fields: FieldDef[], label: string): FieldDef[] {
     fontSizePt: 12,
     align: 'left',
     staticValue: null,
+    widthMm: null,
+    heightMm: null,
   }
   return [...fields, field]
 }

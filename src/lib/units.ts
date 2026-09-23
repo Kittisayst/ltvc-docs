@@ -20,6 +20,11 @@ export function remainingWidthMm(xMm: number): number {
   return Math.max(PAGE_WIDTH_MM - xMm, MIN_FIELD_WIDTH_MM)
 }
 
+/** A field's box width: its explicit width if set, else shrink-to-fit up to the page edge. */
+export function fieldBoxWidthMm(xMm: number, widthMm: number | null): number {
+  return widthMm ?? remainingWidthMm(xMm)
+}
+
 export function clampToPage(
   xMm: number,
   yMm: number,

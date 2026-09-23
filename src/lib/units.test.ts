@@ -3,6 +3,7 @@ import {
   PAGE_HEIGHT_MM,
   PAGE_WIDTH_MM,
   clampToPage,
+  fieldBoxWidthMm,
   mmToPx,
   pxPerMmFromContainer,
   pxToMm,
@@ -56,5 +57,15 @@ describe('remainingWidthMm', () => {
 
   it('never returns less than a small usable minimum, even past the edge', () => {
     expect(remainingWidthMm(PAGE_WIDTH_MM + 50)).toBeGreaterThan(0)
+  })
+})
+
+describe('fieldBoxWidthMm', () => {
+  it('falls back to the remaining page width when no explicit width is set', () => {
+    expect(fieldBoxWidthMm(50, null)).toBe(remainingWidthMm(50))
+  })
+
+  it('uses the explicit width when one is set', () => {
+    expect(fieldBoxWidthMm(50, 80)).toBe(80)
   })
 })
