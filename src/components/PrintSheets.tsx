@@ -26,6 +26,9 @@ export default function PrintSheets({ template, records, fontFamilies }: Props) 
                 overflow: field.widthMm != null || field.heightMm != null ? 'hidden' : undefined,
                 whiteSpace: 'pre-wrap',
                 fontSize: `${field.fontSizePt}pt`,
+                fontWeight: field.bold ? 'bold' : 'normal',
+                fontStyle: field.italic ? 'italic' : 'normal',
+                color: field.color,
                 textAlign: field.align,
                 fontFamily: field.fontId ? fontFamilies[field.fontId] : DEFAULT_FONT_FAMILY,
               }}

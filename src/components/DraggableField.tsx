@@ -50,7 +50,7 @@ export default function DraggableField({
 
   return (
     <div
-      className={`absolute cursor-move touch-none select-none whitespace-pre-wrap border px-1 py-0.5 text-black ${
+      className={`absolute cursor-move touch-none select-none whitespace-pre-wrap border px-1 py-0.5 ${
         selected ? 'border-dashed border-blue-500 bg-blue-50' : 'border-transparent'
       }`}
       style={{
@@ -61,6 +61,9 @@ export default function DraggableField({
         height: field.heightMm != null ? mmToPx(field.heightMm, pxPerMm) : undefined,
         overflow: field.widthMm != null || field.heightMm != null ? 'hidden' : undefined,
         fontSize: field.fontSizePt,
+        fontWeight: field.bold ? 'bold' : 'normal',
+        fontStyle: field.italic ? 'italic' : 'normal',
+        color: field.color,
         textAlign: field.align,
         fontFamily: fontFamily ?? DEFAULT_FONT_FAMILY,
       }}

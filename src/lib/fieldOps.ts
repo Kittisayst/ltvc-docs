@@ -13,6 +13,9 @@ export function addField(fields: FieldDef[], label: string): FieldDef[] {
     staticValue: null,
     widthMm: null,
     heightMm: null,
+    bold: false,
+    italic: false,
+    color: '#000000',
   }
   return [...fields, field]
 }

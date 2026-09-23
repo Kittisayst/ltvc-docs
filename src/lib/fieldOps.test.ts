@@ -14,6 +14,9 @@ function makeField(overrides: Partial<FieldDef> = {}): FieldDef {
     staticValue: null,
     widthMm: null,
     heightMm: null,
+    bold: false,
+    italic: false,
+    color: '#000000',
     ...overrides,
   }
 }

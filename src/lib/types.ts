@@ -21,6 +21,10 @@ export interface FieldDef {
    */
   widthMm: number | null
   heightMm: number | null
+  bold: boolean
+  italic: boolean
+  /** CSS color, e.g. '#000000'. */
+  color: string
 }
 
 export interface Template {

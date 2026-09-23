@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Link, useParams } from 'react-router-dom'
 import {
   Button,
+  ColorPicker,
   Input,
   InputNumber,
   Select,
@@ -11,7 +12,16 @@ import {
   Typography,
   message,
 } from 'antd'
-import { PlusOutlined, ScissorOutlined, UploadOutlined } from '@ant-design/icons'
+import {
+  AlignCenterOutlined,
+  AlignLeftOutlined,
+  AlignRightOutlined,
+  BoldOutlined,
+  ItalicOutlined,
+  PlusOutlined,
+  ScissorOutlined,
+  UploadOutlined,
+} from '@ant-design/icons'
 import { db, saveTemplate, addFont } from '../lib/db'
 import { addField, hasStaticValue, moveField, removeField, updateField } from '../lib/fieldOps'
 import { ensureFontRegistered } from '../lib/fonts'
@@ -122,6 +132,9 @@ export default function TemplateEditorPage() {
       staticValue: string | null
       widthMm: number | null
       heightMm: number | null
+      bold: boolean
+      italic: boolean
+      color: string
     }>,
   ) {
     if (!template) return
@@ -256,18 +269,42 @@ export default function TemplateEditorPage() {
                   }
                 />
               </label>
-              <label className="flex flex-col gap-1">
-                ການຈັດວາງ
-                <Select
-                  value={selectedField.align}
-                  onChange={(v) => handleFieldPatch(selectedField.id, { align: v })}
-                  options={[
-                    { value: 'left', label: 'ຊ້າຍ' },
-                    { value: 'center', label: 'ກາງ' },
-                    { value: 'right', label: 'ຂວາ' },
-                  ]}
-                />
-              </label>
+              <div className="flex flex-col gap-1">
+                ການປັບແຕ່ງຂໍ້ຄວາມ
+                <Space.Compact>
+                  <Button
+                    type={selectedField.bold ? 'primary' : 'default'}
+                    icon={<BoldOutlined />}
+                    onClick={() => handleFieldPatch(selectedField.id, { bold: !selectedField.bold })}
+                  />
+                  <Button
+                    type={selectedField.italic ? 'primary' : 'default'}
+                    icon={<ItalicOutlined />}
+                    onClick={() =>
+                      handleFieldPatch(selectedField.id, { italic: !selectedField.italic })
+                    }
+                  />
+                  <Button
+                    type={selectedField.align === 'left' ? 'primary' : 'default'}
+                    icon={<AlignLeftOutlined />}
+                    onClick={() => handleFieldPatch(selectedField.id, { align: 'left' })}
+                  />
+                  <Button
+                    type={selectedField.align === 'center' ? 'primary' : 'default'}
+                    icon={<AlignCenterOutlined />}
+                    onClick={() => handleFieldPatch(selectedField.id, { align: 'center' })}
+                  />
+                  <Button
+                    type={selectedField.align === 'right' ? 'primary' : 'default'}
+                    icon={<AlignRightOutlined />}
+                    onClick={() => handleFieldPatch(selectedField.id, { align: 'right' })}
+                  />
+                  <ColorPicker
+                    value={selectedField.color}
+                    onChange={(c) => handleFieldPatch(selectedField.id, { color: c.toHexString() })}
+                  />
+                </Space.Compact>
+              </div>
               <label className="flex flex-col gap-1">
                 ຟອນ
                 <Select
