@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import {
   Button,
   ColorPicker,
+  Divider,
   Input,
   InputNumber,
   Select,
@@ -195,9 +196,34 @@ export default function TemplateEditorPage() {
       </Space>
 
       <div className="flex flex-nowrap items-start gap-6">
+        <div className="w-52 shrink-0">
+          <Typography.Title level={5} className="mt-0!">
+            ຊ່ອງຂໍ້ມູນ
+          </Typography.Title>
+          <ul className="list-none p-0">
+            {template.fields.map((f) => (
+              <li key={f.id} className="mb-1 flex gap-1">
+                <Button
+                  type={f.id === selectedFieldId ? 'default' : 'text'}
+                  className="grow text-left! justify-start!"
+                  onClick={() => setSelectedFieldId(f.id)}
+                >
+                  {f.label}
+                </Button>
+                <Button danger type="text" onClick={() => handleRemoveField(f.id)}>
+                  ລຶບ
+                </Button>
+              </li>
+            ))}
+            {template.fields.length === 0 && (
+              <li className="text-sm text-gray-400">ຍັງບໍ່ມີຊ່ອງຂໍ້ມູນ</li>
+            )}
+          </ul>
+        </div>
+
         <div
           ref={pageRef}
-          className="relative min-w-0 flex-1 max-w-205 border border-gray-300 bg-white bg-cover bg-no-repeat"
+          className="relative min-w-0 flex-1 border border-gray-300 bg-white bg-cover bg-no-repeat"
           style={{
             aspectRatio: `${PAGE_WIDTH_MM} / ${PAGE_HEIGHT_MM}`,
             backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
@@ -216,27 +242,18 @@ export default function TemplateEditorPage() {
           ))}
         </div>
 
-        <div className="w-70 shrink-0">
-          <Typography.Title level={4}>ຊ່ອງຂໍ້ມູນ</Typography.Title>
-          <ul className="mb-4 list-none p-0">
-            {template.fields.map((f) => (
-              <li key={f.id} className="mb-1 flex gap-1">
-                <Button
-                  type={f.id === selectedFieldId ? 'default' : 'text'}
-                  className="grow text-left! justify-start!"
-                  onClick={() => setSelectedFieldId(f.id)}
-                >
-                  {f.label}
-                </Button>
-                <Button danger type="text" onClick={() => handleRemoveField(f.id)}>
-                  ລຶບ
-                </Button>
-              </li>
-            ))}
-          </ul>
+        <div className="w-85 shrink-0 text-sm">
+          <Typography.Title level={5} className="mt-0!">
+            ການຕັ້ງຄ່າຊ່ອງຂໍ້ມູນ
+          </Typography.Title>
+
+          {!selectedField && (
+            <Typography.Text type="secondary">ເລືອກຊ່ອງຂໍ້ມູນທາງຊ້າຍເພື່ອຕັ້ງຄ່າ</Typography.Text>
+          )}
 
           {selectedField && (
-            <div className="flex flex-col gap-3 border-t border-gray-200 pt-3 text-sm">
+            <div className="flex flex-col gap-3">
+              <Typography.Text strong>ຂໍ້ມູນ</Typography.Text>
               <label className="flex flex-col gap-1">
                 ປ້າຍຊື່
                 <Input
@@ -267,65 +284,9 @@ export default function TemplateEditorPage() {
                   />
                 </label>
               )}
-              <label className="flex flex-col gap-1">
-                ຂະໜາດຕົວອັກສອນ (pt)
-                <InputNumber
-                  className="w-full"
-                  min={6}
-                  max={72}
-                  value={selectedField.fontSizePt}
-                  onChange={(v) =>
-                    v != null && handleFieldPatch(selectedField.id, { fontSizePt: v })
-                  }
-                />
-              </label>
-              <div className="flex flex-col gap-1">
-                ການປັບແຕ່ງຂໍ້ຄວາມ
-                <Space.Compact>
-                  <Button
-                    type={selectedField.bold ? 'primary' : 'default'}
-                    icon={<BoldOutlined />}
-                    onClick={() => handleFieldPatch(selectedField.id, { bold: !selectedField.bold })}
-                  />
-                  <Button
-                    type={selectedField.italic ? 'primary' : 'default'}
-                    icon={<ItalicOutlined />}
-                    onClick={() =>
-                      handleFieldPatch(selectedField.id, { italic: !selectedField.italic })
-                    }
-                  />
-                  <Button
-                    type={selectedField.align === 'left' ? 'primary' : 'default'}
-                    icon={<AlignLeftOutlined />}
-                    onClick={() => handleFieldPatch(selectedField.id, { align: 'left' })}
-                  />
-                  <Button
-                    type={selectedField.align === 'center' ? 'primary' : 'default'}
-                    icon={<AlignCenterOutlined />}
-                    onClick={() => handleFieldPatch(selectedField.id, { align: 'center' })}
-                  />
-                  <Button
-                    type={selectedField.align === 'right' ? 'primary' : 'default'}
-                    icon={<AlignRightOutlined />}
-                    onClick={() => handleFieldPatch(selectedField.id, { align: 'right' })}
-                  />
-                  <ColorPicker
-                    value={selectedField.color}
-                    onChange={(c) => handleFieldPatch(selectedField.id, { color: c.toHexString() })}
-                  />
-                </Space.Compact>
-              </div>
-              <label className="flex flex-col gap-1">
-                ຟອນ
-                <Select
-                  value={selectedField.fontId ?? ''}
-                  onChange={(v) => handleFieldPatch(selectedField.id, { fontId: v || null })}
-                  options={[
-                    { value: '', label: '(ຟອນມາດຕະຖານ — Phetsarath OT)' },
-                    ...(fonts?.map((f) => ({ value: f.id, label: f.name })) ?? []),
-                  ]}
-                />
-              </label>
+
+              <Divider className="my-1!" />
+              <Typography.Text strong>ຕຳແໜ່ງ ແລະ ຂະໜາດ</Typography.Text>
               <div className="flex gap-2">
                 <label className="flex flex-col gap-1 grow">
                   ຕຳແໜ່ງ X (mm)
@@ -379,6 +340,65 @@ export default function TemplateEditorPage() {
               <Typography.Text type="secondary">
                 ປ່ອຍຄວາມກວ້າງ/ສູງໃຫ້ຫວ່າງເພື່ອອັດຕະໂນມັດຕາມຂໍ້ຄວາມ. ລາກຂໍ້ຄວາມເທິງຮູບເພື່ອຍ້າຍ, ຫຼືພິມຕຳແໜ່ງເອງຂ້າງເທິງ
               </Typography.Text>
+
+              <Divider className="my-1!" />
+              <Typography.Text strong>ການປັບແຕ່ງຂໍ້ຄວາມ</Typography.Text>
+              <Space.Compact>
+                <Button
+                  type={selectedField.bold ? 'primary' : 'default'}
+                  icon={<BoldOutlined />}
+                  onClick={() => handleFieldPatch(selectedField.id, { bold: !selectedField.bold })}
+                />
+                <Button
+                  type={selectedField.italic ? 'primary' : 'default'}
+                  icon={<ItalicOutlined />}
+                  onClick={() =>
+                    handleFieldPatch(selectedField.id, { italic: !selectedField.italic })
+                  }
+                />
+                <Button
+                  type={selectedField.align === 'left' ? 'primary' : 'default'}
+                  icon={<AlignLeftOutlined />}
+                  onClick={() => handleFieldPatch(selectedField.id, { align: 'left' })}
+                />
+                <Button
+                  type={selectedField.align === 'center' ? 'primary' : 'default'}
+                  icon={<AlignCenterOutlined />}
+                  onClick={() => handleFieldPatch(selectedField.id, { align: 'center' })}
+                />
+                <Button
+                  type={selectedField.align === 'right' ? 'primary' : 'default'}
+                  icon={<AlignRightOutlined />}
+                  onClick={() => handleFieldPatch(selectedField.id, { align: 'right' })}
+                />
+                <ColorPicker
+                  value={selectedField.color}
+                  onChange={(c) => handleFieldPatch(selectedField.id, { color: c.toHexString() })}
+                />
+              </Space.Compact>
+              <label className="flex flex-col gap-1">
+                ຂະໜາດຕົວອັກສອນ (pt)
+                <InputNumber
+                  className="w-full"
+                  min={6}
+                  max={72}
+                  value={selectedField.fontSizePt}
+                  onChange={(v) =>
+                    v != null && handleFieldPatch(selectedField.id, { fontSizePt: v })
+                  }
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                ຟອນ
+                <Select
+                  value={selectedField.fontId ?? ''}
+                  onChange={(v) => handleFieldPatch(selectedField.id, { fontId: v || null })}
+                  options={[
+                    { value: '', label: '(ຟອນມາດຕະຖານ — Phetsarath OT)' },
+                    ...(fonts?.map((f) => ({ value: f.id, label: f.name })) ?? []),
+                  ]}
+                />
+              </label>
             </div>
           )}
         </div>
