@@ -1,4 +1,5 @@
 import { DEFAULT_FONT_FAMILY } from '../lib/fonts'
+import { remainingWidthMm } from '../lib/units'
 import type { CertRecord, Template } from '../lib/types'
 
 interface Props {
@@ -19,6 +20,8 @@ export default function PrintSheets({ template, records, fontFamilies }: Props) 
               style={{
                 left: `${field.xMm}mm`,
                 top: `${field.yMm}mm`,
+                maxWidth: `${remainingWidthMm(field.xMm)}mm`,
+                whiteSpace: 'pre-wrap',
                 fontSize: `${field.fontSizePt}pt`,
                 textAlign: field.align,
                 fontFamily: field.fontId ? fontFamilies[field.fontId] : DEFAULT_FONT_FAMILY,

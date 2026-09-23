@@ -13,6 +13,13 @@ export function pxPerMmFromContainer(containerWidthPx: number): number {
   return containerWidthPx / PAGE_WIDTH_MM
 }
 
+const MIN_FIELD_WIDTH_MM = 10
+
+/** Space available for a field's text before it runs off the right page edge. */
+export function remainingWidthMm(xMm: number): number {
+  return Math.max(PAGE_WIDTH_MM - xMm, MIN_FIELD_WIDTH_MM)
+}
+
 export function clampToPage(
   xMm: number,
   yMm: number,

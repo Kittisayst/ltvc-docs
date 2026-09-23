@@ -6,6 +6,7 @@ import {
   mmToPx,
   pxPerMmFromContainer,
   pxToMm,
+  remainingWidthMm,
 } from './units'
 
 describe('mmToPx / pxToMm', () => {
@@ -45,5 +46,15 @@ describe('clampToPage', () => {
       xMm: PAGE_WIDTH_MM,
       yMm: PAGE_HEIGHT_MM,
     })
+  })
+})
+
+describe('remainingWidthMm', () => {
+  it('returns the space between a field and the right page edge', () => {
+    expect(remainingWidthMm(50)).toBe(PAGE_WIDTH_MM - 50)
+  })
+
+  it('never returns less than a small usable minimum, even past the edge', () => {
+    expect(remainingWidthMm(PAGE_WIDTH_MM + 50)).toBeGreaterThan(0)
   })
 })

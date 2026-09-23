@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import type { FieldDef } from '../lib/types'
 import { DEFAULT_FONT_FAMILY } from '../lib/fonts'
-import { clampToPage, mmToPx, pxToMm } from '../lib/units'
+import { clampToPage, mmToPx, pxToMm, remainingWidthMm } from '../lib/units'
 
 interface Props {
   field: FieldDef
@@ -50,12 +50,13 @@ export default function DraggableField({
 
   return (
     <div
-      className={`absolute cursor-move touch-none select-none whitespace-nowrap border px-1 py-0.5 text-black ${
+      className={`absolute cursor-move touch-none select-none whitespace-pre-wrap border px-1 py-0.5 text-black ${
         selected ? 'border-dashed border-blue-500 bg-blue-50' : 'border-transparent'
       }`}
       style={{
         left: mmToPx(field.xMm, pxPerMm),
         top: mmToPx(field.yMm, pxPerMm),
+        maxWidth: mmToPx(remainingWidthMm(field.xMm), pxPerMm),
         fontSize: field.fontSizePt,
         textAlign: field.align,
         fontFamily: fontFamily ?? DEFAULT_FONT_FAMILY,

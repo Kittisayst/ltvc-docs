@@ -233,11 +233,12 @@ export default function TemplateEditorPage() {
               {hasStaticValue(selectedField) && (
                 <label className="flex flex-col gap-1">
                   ຂໍ້ຄວາມ
-                  <Input
+                  <Input.TextArea
                     value={selectedField.staticValue}
                     onChange={(e) =>
                       handleFieldPatch(selectedField.id, { staticValue: e.target.value })
                     }
+                    autoSize={{ minRows: 2, maxRows: 6 }}
                   />
                 </label>
               )}
