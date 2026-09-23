@@ -3,7 +3,9 @@ import {
   PAGE_HEIGHT_MM,
   PAGE_WIDTH_MM,
   clampToPage,
+  clampZoom,
   fieldBoxWidthMm,
+  fitPxPerMm,
   mmToPx,
   pxPerMmFromContainer,
   pxToMm,
@@ -57,6 +59,39 @@ describe('remainingWidthMm', () => {
 
   it('never returns less than a small usable minimum, even past the edge', () => {
     expect(remainingWidthMm(PAGE_WIDTH_MM + 50)).toBeGreaterThan(0)
+  })
+})
+
+describe('fitPxPerMm', () => {
+  it('picks the width-limited scale when the wrapper is wider than tall relative to A4', () => {
+    // A very wide, short wrapper: height is the binding constraint.
+    const scale = fitPxPerMm(3000, 210)
+    expect(scale).toBeCloseTo(210 / PAGE_HEIGHT_MM, 6)
+  })
+
+  it('picks the height-limited scale when the wrapper is taller than wide relative to A4', () => {
+    // A narrow, tall wrapper: width is the binding constraint.
+    const scale = fitPxPerMm(297, 3000)
+    expect(scale).toBeCloseTo(297 / PAGE_WIDTH_MM, 6)
+  })
+
+  it('fills the wrapper exactly on both axes when its aspect ratio matches A4', () => {
+    const scale = fitPxPerMm(PAGE_WIDTH_MM * 4, PAGE_HEIGHT_MM * 4)
+    expect(scale).toBeCloseTo(4, 6)
+  })
+})
+
+describe('clampZoom', () => {
+  it('leaves in-range zoom untouched', () => {
+    expect(clampZoom(1.5)).toBe(1.5)
+  })
+
+  it('clamps below the minimum zoom', () => {
+    expect(clampZoom(0.01)).toBeGreaterThanOrEqual(0.25)
+  })
+
+  it('clamps above the maximum zoom', () => {
+    expect(clampZoom(100)).toBeLessThanOrEqual(3)
   })
 })
 

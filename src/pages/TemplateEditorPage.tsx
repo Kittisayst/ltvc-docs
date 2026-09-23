@@ -23,11 +23,13 @@ import {
   PlusOutlined,
   ScissorOutlined,
   UploadOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined,
 } from '@ant-design/icons'
 import { db, saveTemplate, addFont } from '../lib/db'
 import { addField, hasStaticValue, moveField, removeField, updateField } from '../lib/fieldOps'
 import { ensureFontRegistered } from '../lib/fonts'
-import { PAGE_HEIGHT_MM, PAGE_WIDTH_MM, pxPerMmFromContainer } from '../lib/units'
+import { PAGE_HEIGHT_MM, PAGE_WIDTH_MM, clampZoom, fitPxPerMm, mmToPx } from '../lib/units'
 import DraggableField from '../components/DraggableField'
 import ImageCropModal from '../components/ImageCropModal'
 import AddFieldModal from '../components/AddFieldModal'
@@ -42,12 +44,14 @@ export default function TemplateEditorPage() {
   const fonts = useLiveQuery(() => db.fonts.toArray(), [])
 
   const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const [pxPerMm, setPxPerMm] = useState(3)
+  const [fitScale, setFitScale] = useState(3)
+  const [zoom, setZoom] = useState(1)
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null)
   const [fontFamilies, setFontFamilies] = useState<Record<string, string>>({})
   const [cropSource, setCropSource] = useState<{ url: string; revoke: boolean } | null>(null)
   const [addFieldOpen, setAddFieldOpen] = useState(false)
   const pageRef = useRef<HTMLDivElement>(null)
+  const pxPerMm = fitScale * zoom
 
   useEffect(() => {
     if (!template?.referenceImage) {
@@ -61,7 +65,9 @@ export default function TemplateEditorPage() {
 
   useEffect(() => {
     function updateScale() {
-      if (pageRef.current) setPxPerMm(pxPerMmFromContainer(pageRef.current.clientWidth))
+      if (pageRef.current) {
+        setFitScale(fitPxPerMm(pageRef.current.clientWidth, pageRef.current.clientHeight))
+      }
     }
     updateScale()
     window.addEventListener('resize', updateScale)
@@ -221,26 +227,46 @@ export default function TemplateEditorPage() {
           </ul>
         </div>
 
-        <div
-          ref={pageRef}
-          className="relative min-w-0 flex-1 border border-gray-300 bg-white bg-no-repeat"
-          style={{
-            aspectRatio: `${PAGE_WIDTH_MM} / ${PAGE_HEIGHT_MM}`,
-            backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
-            backgroundSize: '100% 100%',
-          }}
-        >
-          {template.fields.map((field) => (
-            <DraggableField
-              key={field.id}
-              field={field}
-              pxPerMm={pxPerMm}
-              selected={field.id === selectedFieldId}
-              fontFamily={field.fontId ? (fontFamilies[field.fontId] ?? null) : null}
-              onSelect={() => setSelectedFieldId(field.id)}
-              onMove={(xMm, yMm) => handleMove(field.id, xMm, yMm)}
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <Space className="shrink-0">
+            <Button
+              icon={<ZoomOutOutlined />}
+              onClick={() => setZoom((z) => clampZoom(z - 0.1))}
             />
-          ))}
+            <span className="w-12 text-center text-sm">{Math.round(zoom * 100)}%</span>
+            <Button
+              icon={<ZoomInOutlined />}
+              onClick={() => setZoom((z) => clampZoom(z + 0.1))}
+            />
+            <Button onClick={() => setZoom(1)}>ພໍດີກັບໜ້າຈໍ</Button>
+          </Space>
+
+          <div
+            ref={pageRef}
+            className="flex h-[calc(100vh-280px)] min-h-100 items-center justify-center overflow-auto rounded bg-gray-100 p-4"
+          >
+            <div
+              className="relative shrink-0 border border-gray-300 bg-white bg-no-repeat"
+              style={{
+                width: mmToPx(PAGE_WIDTH_MM, pxPerMm),
+                height: mmToPx(PAGE_HEIGHT_MM, pxPerMm),
+                backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
+                backgroundSize: '100% 100%',
+              }}
+            >
+              {template.fields.map((field) => (
+                <DraggableField
+                  key={field.id}
+                  field={field}
+                  pxPerMm={pxPerMm}
+                  selected={field.id === selectedFieldId}
+                  fontFamily={field.fontId ? (fontFamilies[field.fontId] ?? null) : null}
+                  onSelect={() => setSelectedFieldId(field.id)}
+                  onMove={(xMm, yMm) => handleMove(field.id, xMm, yMm)}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="w-85 shrink-0 text-sm">

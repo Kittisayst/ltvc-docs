@@ -13,6 +13,18 @@ export function pxPerMmFromContainer(containerWidthPx: number): number {
   return containerWidthPx / PAGE_WIDTH_MM
 }
 
+/** The px-per-mm scale that fits the whole A4 page inside a box of this size, on both axes. */
+export function fitPxPerMm(wrapperWidthPx: number, wrapperHeightPx: number): number {
+  return Math.min(wrapperWidthPx / PAGE_WIDTH_MM, wrapperHeightPx / PAGE_HEIGHT_MM)
+}
+
+const MIN_ZOOM = 0.25
+const MAX_ZOOM = 3
+
+export function clampZoom(zoom: number): number {
+  return Math.min(Math.max(zoom, MIN_ZOOM), MAX_ZOOM)
+}
+
 const MIN_FIELD_WIDTH_MM = 10
 
 /** Space available for a field's text before it runs off the right page edge. */
