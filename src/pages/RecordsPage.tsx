@@ -101,11 +101,13 @@ export default function RecordsPage() {
     setPrintQueue(filtered)
   }
 
+  const editableFields = template.fields.filter((f) => f.staticValue === null)
+
   const columns = [
     ...template.fields.map((f) => ({
       title: f.label,
-      dataIndex: ['values', f.id],
       key: f.id,
+      render: (_: unknown, r: CertRecord) => f.staticValue ?? r.values[f.id],
     })),
     {
       title: 'ສະຖານະ',
@@ -145,7 +147,7 @@ export default function RecordsPage() {
         <Typography.Title level={4} className="m-0!">
           {editingId ? 'ແກ້ໄຂລາຍການ' : 'ຕື່ມຂໍ້ມູນໃໝ່'}
         </Typography.Title>
-        {template.fields.map((field) => (
+        {editableFields.map((field) => (
           <label key={field.id} className="flex flex-col gap-1 text-sm">
             {field.label}
             <Input
@@ -154,6 +156,11 @@ export default function RecordsPage() {
             />
           </label>
         ))}
+        {template.fields.length > editableFields.length && (
+          <Typography.Text type="secondary">
+            ຊ່ອງທີ່ເປັນຄ່າຄົງທີ່ຈະຖືກຕື່ມໃຫ້ອັດຕະໂນມັດຕອນພິມ, ບໍ່ຕ້ອງພິມຊ້ຳ.
+          </Typography.Text>
+        )}
         <Space>
           <Button type="primary" icon={<PlusOutlined />} onClick={handleSaveRecord}>
             {editingId ? 'ບັນທຶກການແກ້ໄຂ' : 'ເພີ່ມລາຍການ'}

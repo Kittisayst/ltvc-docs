@@ -8,6 +8,12 @@ export interface FieldDef {
   fontId: string | null
   fontSizePt: number
   align: Align
+  /**
+   * When set, this field's text is the same on every certificate: it
+   * lives on the Template, not per Record. Data entry skips it and
+   * printing reads straight from here instead of the Record's values.
+   */
+  staticValue: string | null
 }
 
 export interface Template {

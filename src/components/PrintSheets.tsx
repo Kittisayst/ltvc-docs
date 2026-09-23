@@ -24,7 +24,7 @@ export default function PrintSheets({ template, records, fontFamilies }: Props) 
                 fontFamily: field.fontId ? fontFamilies[field.fontId] : DEFAULT_FONT_FAMILY,
               }}
             >
-              {record.values[field.id] ?? ''}
+              {field.staticValue ?? record.values[field.id] ?? ''}
             </div>
           ))}
         </div>

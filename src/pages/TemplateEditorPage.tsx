@@ -7,6 +7,7 @@ import {
   InputNumber,
   Select,
   Space,
+  Switch,
   Typography,
   message,
 } from 'antd'
@@ -111,7 +112,13 @@ export default function TemplateEditorPage() {
 
   async function handleFieldPatch(
     fieldId: string,
-    patch: Partial<{ label: string; fontSizePt: number; align: Align; fontId: string | null }>,
+    patch: Partial<{
+      label: string
+      fontSizePt: number
+      align: Align
+      fontId: string | null
+      staticValue: string | null
+    }>,
   ) {
     if (!template) return
     await saveTemplate({ ...template, fields: updateField(template.fields, fieldId, patch) })
@@ -210,6 +217,28 @@ export default function TemplateEditorPage() {
                   onChange={(e) => handleFieldPatch(selectedField.id, { label: e.target.value })}
                 />
               </label>
+              <label className="flex items-center gap-2">
+                <Switch
+                  checked={selectedField.staticValue !== null}
+                  onChange={(checked) =>
+                    handleFieldPatch(selectedField.id, {
+                      staticValue: checked ? '' : null,
+                    })
+                  }
+                />
+                ຄ່າຄົງທີ່ (ຂໍ້ຄວາມຄືກັນທຸກໃບ)
+              </label>
+              {selectedField.staticValue !== null && (
+                <label className="flex flex-col gap-1">
+                  ຂໍ້ຄວາມ
+                  <Input
+                    value={selectedField.staticValue}
+                    onChange={(e) =>
+                      handleFieldPatch(selectedField.id, { staticValue: e.target.value })
+                    }
+                  />
+                </label>
+              )}
               <label className="flex flex-col gap-1">
                 ຂະໜາດຕົວອັກສອນ (pt)
                 <InputNumber

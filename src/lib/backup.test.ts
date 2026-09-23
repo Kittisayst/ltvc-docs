@@ -45,6 +45,7 @@ describe('exportBackup / importBackup', () => {
           fontId: null,
           fontSizePt: 14,
           align: 'left',
+          staticValue: null,
         },
       ],
     })

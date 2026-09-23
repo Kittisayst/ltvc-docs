@@ -64,7 +64,7 @@ export default function DraggableField({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
     >
-      {field.label}
+      {field.staticValue ?? field.label}
     </div>
   )
 }

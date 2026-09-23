@@ -11,6 +11,7 @@ function makeField(overrides: Partial<FieldDef> = {}): FieldDef {
     fontId: null,
     fontSizePt: 12,
     align: 'left',
+    staticValue: null,
     ...overrides,
   }
 }
@@ -34,6 +35,11 @@ describe('addField', () => {
     const two = addField(one, 'B')
     expect(two[0].id).not.toBe(two[1].id)
   })
+
+  it('defaults staticValue to null (a per-record field)', () => {
+    const fields = addField([], 'ຊື່')
+    expect(fields[0].staticValue).toBeNull()
+  })
 })
 
 describe('updateField', () => {
@@ -48,6 +54,12 @@ describe('updateField', () => {
     const fields = [makeField({ id: 'a' })]
     const updated = updateField(fields, 'missing', { xMm: 99 })
     expect(updated).toEqual(fields)
+  })
+
+  it('sets a static value, making the field the same on every record', () => {
+    const fields = [makeField({ id: 'a' })]
+    const updated = updateField(fields, 'a', { staticValue: 'ພະແນກ ວິສະວະກຳຊອບແວ' })
+    expect(updated[0].staticValue).toBe('ພະແນກ ວິສະວະກຳຊອບແວ')
   })
 })
 
