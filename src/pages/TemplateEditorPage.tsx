@@ -18,6 +18,7 @@ import { ensureFontRegistered } from '../lib/fonts'
 import { PAGE_HEIGHT_MM, PAGE_WIDTH_MM, pxPerMmFromContainer } from '../lib/units'
 import DraggableField from '../components/DraggableField'
 import ImageCropModal from '../components/ImageCropModal'
+import AddFieldModal from '../components/AddFieldModal'
 import type { Align } from '../lib/types'
 
 export default function TemplateEditorPage() {
@@ -33,6 +34,7 @@ export default function TemplateEditorPage() {
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null)
   const [fontFamilies, setFontFamilies] = useState<Record<string, string>>({})
   const [cropSource, setCropSource] = useState<{ url: string; revoke: boolean } | null>(null)
+  const [addFieldOpen, setAddFieldOpen] = useState(false)
   const pageRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -97,12 +99,12 @@ export default function TemplateEditorPage() {
     message.success(`ອັບໂຫລດຟອນ "${file.name}" ສຳເລັດ`)
   }
 
-  async function handleAddField() {
-    const label = prompt('ຊື່ຊ່ອງຂໍ້ມູນ (ເຊັ່ນ: ຊື່ ແລະ ນາມສະກຸນ)')
-    if (!label || !template) return
+  async function handleAddField(label: string) {
+    if (!template) return
     const fields = addField(template.fields, label)
     await saveTemplate({ ...template, fields })
     setSelectedFieldId(fields[fields.length - 1].id)
+    setAddFieldOpen(false)
   }
 
   async function handleMove(fieldId: string, xMm: number, yMm: number) {
@@ -162,7 +164,7 @@ export default function TemplateEditorPage() {
             />
           </label>
         </Button>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAddField}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddFieldOpen(true)}>
           ເພີ່ມຊ່ອງຂໍ້ມູນ
         </Button>
       </Space>
@@ -274,9 +276,32 @@ export default function TemplateEditorPage() {
                   ]}
                 />
               </label>
+              <div className="flex gap-2">
+                <label className="flex flex-col gap-1 grow">
+                  ຕຳແໜ່ງ X (mm)
+                  <InputNumber
+                    className="w-full"
+                    min={0}
+                    max={PAGE_WIDTH_MM}
+                    step={0.5}
+                    value={selectedField.xMm}
+                    onChange={(v) => v != null && handleMove(selectedField.id, v, selectedField.yMm)}
+                  />
+                </label>
+                <label className="flex flex-col gap-1 grow">
+                  ຕຳແໜ່ງ Y (mm)
+                  <InputNumber
+                    className="w-full"
+                    min={0}
+                    max={PAGE_HEIGHT_MM}
+                    step={0.5}
+                    value={selectedField.yMm}
+                    onChange={(v) => v != null && handleMove(selectedField.id, selectedField.xMm, v)}
+                  />
+                </label>
+              </div>
               <Typography.Text type="secondary">
-                ຕຳແໜ່ງ: {selectedField.xMm.toFixed(1)}mm, {selectedField.yMm.toFixed(1)}mm — ລາກ
-                ຂໍ້ຄວາມເທິງຮູບເພື່ອຍ້າຍ
+                ລາກຂໍ້ຄວາມເທິງຮູບເພື່ອຍ້າຍ, ຫຼືພິມຕຳແໜ່ງເອງຂ້າງເທິງ
               </Typography.Text>
             </div>
           )}
@@ -291,6 +316,12 @@ export default function TemplateEditorPage() {
           onConfirm={handleCropConfirm}
         />
       )}
+
+      <AddFieldModal
+        open={addFieldOpen}
+        onCancel={() => setAddFieldOpen(false)}
+        onConfirm={handleAddField}
+      />
     </div>
   )
 }
