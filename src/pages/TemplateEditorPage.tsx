@@ -52,6 +52,15 @@ export default function TemplateEditorPage() {
   const [addFieldOpen, setAddFieldOpen] = useState(false)
   const pageRef = useRef<HTMLDivElement>(null)
   const pxPerMm = fitScale * zoom
+  // Dexie hands back a new Blob instance for referenceImage on every
+  // liveQuery re-emit (e.g. a saveTemplate fired by dragging a field),
+  // even when the image itself hasn't changed. Keying off a content
+  // fingerprint instead of the Blob's object identity means this only
+  // re-creates the object URL (and thus reloads the image) when the
+  // image actually changes, not on every unrelated save.
+  const referenceImageKey = template?.referenceImage
+    ? `${template.referenceImage.size}:${template.referenceImage.type}`
+    : null
 
   useEffect(() => {
     if (!template?.referenceImage) {
@@ -61,7 +70,9 @@ export default function TemplateEditorPage() {
     const url = URL.createObjectURL(template.referenceImage)
     setImageUrl(url)
     return () => URL.revokeObjectURL(url)
-  }, [template?.referenceImage])
+    // referenceImageKey (not the Blob itself) intentionally drives this effect - see comment above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [referenceImageKey])
 
   useEffect(() => {
     function updateScale() {
