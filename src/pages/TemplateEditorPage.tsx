@@ -10,12 +10,13 @@ import {
   Typography,
   message,
 } from 'antd'
-import { PlusOutlined, UploadOutlined } from '@ant-design/icons'
+import { PlusOutlined, ScissorOutlined, UploadOutlined } from '@ant-design/icons'
 import { db, saveTemplate, addFont } from '../lib/db'
 import { addField, moveField, removeField, updateField } from '../lib/fieldOps'
 import { ensureFontRegistered } from '../lib/fonts'
 import { PAGE_HEIGHT_MM, PAGE_WIDTH_MM, pxPerMmFromContainer } from '../lib/units'
 import DraggableField from '../components/DraggableField'
+import ImageCropModal from '../components/ImageCropModal'
 import type { Align } from '../lib/types'
 
 export default function TemplateEditorPage() {
@@ -30,6 +31,7 @@ export default function TemplateEditorPage() {
   const [pxPerMm, setPxPerMm] = useState(3)
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null)
   const [fontFamilies, setFontFamilies] = useState<Record<string, string>>({})
+  const [cropSource, setCropSource] = useState<{ url: string; revoke: boolean } | null>(null)
   const pageRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -62,11 +64,27 @@ export default function TemplateEditorPage() {
 
   if (!template) return <div className="p-6">ກຳລັງໂຫຼດ...</div>
 
-  async function handleReferenceImage(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleReferenceImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     e.target.value = ''
-    if (!file || !template) return
-    await saveTemplate({ ...template, referenceImage: file })
+    if (!file) return
+    setCropSource({ url: URL.createObjectURL(file), revoke: true })
+  }
+
+  function openCropForExisting() {
+    if (!imageUrl) return
+    setCropSource({ url: imageUrl, revoke: false })
+  }
+
+  function closeCrop() {
+    if (cropSource?.revoke) URL.revokeObjectURL(cropSource.url)
+    setCropSource(null)
+  }
+
+  async function handleCropConfirm(blob: Blob) {
+    if (!template) return
+    await saveTemplate({ ...template, referenceImage: blob })
+    closeCrop()
   }
 
   async function handleFontUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -121,6 +139,11 @@ export default function TemplateEditorPage() {
             <input type="file" accept="image/*" onChange={handleReferenceImage} hidden />
           </label>
         </Button>
+        {imageUrl && (
+          <Button icon={<ScissorOutlined />} onClick={openCropForExisting}>
+            ຕັດ/ໝູນຮູບ
+          </Button>
+        )}
         <Button icon={<UploadOutlined />}>
           <label className="cursor-pointer">
             ອັບໂຫລດຟອນ
@@ -230,6 +253,15 @@ export default function TemplateEditorPage() {
           )}
         </div>
       </div>
+
+      {cropSource && (
+        <ImageCropModal
+          imageUrl={cropSource.url}
+          open
+          onCancel={closeCrop}
+          onConfirm={handleCropConfirm}
+        />
+      )}
     </div>
   )
 }
