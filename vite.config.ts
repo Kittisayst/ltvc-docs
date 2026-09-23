@@ -5,6 +5,7 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/ltvc-docs/',
   plugins: [react(), tailwindcss()],
   test: {
     environment: 'jsdom',
