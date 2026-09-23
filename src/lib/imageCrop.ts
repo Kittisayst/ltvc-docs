@@ -17,6 +17,10 @@ export function rotatedBoundingBox(
   }
 }
 
+export function rotateBy90(currentDeg: number, direction: 1 | -1): number {
+  return ((currentDeg + direction * 90) % 360 + 360) % 360
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image()

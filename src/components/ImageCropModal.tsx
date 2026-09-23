@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import Cropper, { type Area } from 'react-easy-crop'
 import { Button, Modal, Slider, Space } from 'antd'
-import { cropImageToBlob } from '../lib/imageCrop'
+import { RotateLeftOutlined, RotateRightOutlined } from '@ant-design/icons'
+import { cropImageToBlob, rotateBy90 } from '../lib/imageCrop'
 import { PAGE_HEIGHT_MM, PAGE_WIDTH_MM } from '../lib/units'
 
 interface Props {
@@ -69,17 +70,23 @@ export default function ImageCropModal({ imageUrl, open, onCancel, onConfirm }: 
             onChange={setZoom}
           />
         </label>
-        <label className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-3 text-sm">
           <span className="w-16 shrink-0">ໝູນ</span>
-          <Slider
-            className="grow"
-            min={-180}
-            max={180}
-            step={1}
-            value={rotation}
-            onChange={setRotation}
-          />
-        </label>
+          <Space>
+            <Button
+              icon={<RotateLeftOutlined />}
+              onClick={() => setRotation((r) => rotateBy90(r, -1))}
+            >
+              ຊ້າຍ
+            </Button>
+            <Button
+              icon={<RotateRightOutlined />}
+              onClick={() => setRotation((r) => rotateBy90(r, 1))}
+            >
+              ຂວາ
+            </Button>
+          </Space>
+        </div>
       </Space>
     </Modal>
   )
