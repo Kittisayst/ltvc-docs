@@ -50,7 +50,12 @@ export default function TemplatesPage() {
 
   return (
     <div className="mx-auto max-w-3xl p-6">
-      <Typography.Title level={2}>ແບບຟອມໃບຍ້ອງຍໍ</Typography.Title>
+      <div className="mb-4 flex items-center gap-3">
+        <img src={`${import.meta.env.BASE_URL}ltvc_logo.png`} alt="" className="h-14 w-14" />
+        <Typography.Title level={2} className="m-0!">
+          ແບບຟອມໃບຍ້ອງຍໍ
+        </Typography.Title>
+      </div>
 
       <Space.Compact className="mb-4 w-full max-w-md">
         <Input
