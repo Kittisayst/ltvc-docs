@@ -152,7 +152,7 @@ export default function TemplateEditorPage() {
   const selectedField = template.fields.find((f) => f.id === selectedFieldId) ?? null
 
   return (
-    <div className="mx-auto max-w-6xl p-6">
+    <div className="mx-auto max-w-[1800px] p-6">
       <Space className="mb-2">
         <Link to="/">← ແບບຟອມທັງໝົດ</Link>
       </Space>
@@ -196,7 +196,7 @@ export default function TemplateEditorPage() {
       </Space>
 
       <div className="flex flex-nowrap items-start gap-6">
-        <div className="w-52 shrink-0">
+        <div className="w-44 shrink-0">
           <Typography.Title level={5} className="mt-0!">
             ຊ່ອງຂໍ້ມູນ
           </Typography.Title>
@@ -223,10 +223,11 @@ export default function TemplateEditorPage() {
 
         <div
           ref={pageRef}
-          className="relative min-w-0 flex-1 border border-gray-300 bg-white bg-cover bg-no-repeat"
+          className="relative min-w-0 flex-1 border border-gray-300 bg-white bg-no-repeat"
           style={{
             aspectRatio: `${PAGE_WIDTH_MM} / ${PAGE_HEIGHT_MM}`,
             backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
+            backgroundSize: '100% 100%',
           }}
         >
           {template.fields.map((field) => (
