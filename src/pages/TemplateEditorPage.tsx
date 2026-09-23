@@ -137,10 +137,10 @@ export default function TemplateEditorPage() {
         </Button>
       </Space>
 
-      <div className="flex flex-wrap items-start gap-6">
+      <div className="flex flex-nowrap items-start gap-6">
         <div
           ref={pageRef}
-          className="relative w-[min(70vw,900px)] shrink-0 border border-gray-300 bg-white bg-cover bg-no-repeat"
+          className="relative min-w-0 flex-1 max-w-205 border border-gray-300 bg-white bg-cover bg-no-repeat"
           style={{
             aspectRatio: `${PAGE_WIDTH_MM} / ${PAGE_HEIGHT_MM}`,
             backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
