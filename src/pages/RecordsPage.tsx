@@ -12,6 +12,7 @@ import {
 } from 'antd'
 import { PlusOutlined, PrinterOutlined, SearchOutlined } from '@ant-design/icons'
 import { db, saveRecord, deleteRecord as removeRecordFromDb } from '../lib/db'
+import { hasStaticValue } from '../lib/fieldOps'
 import { createDraftRecord, filterRecords, markPrinted } from '../lib/records'
 import { ensureFontRegistered } from '../lib/fonts'
 import PrintSheets from '../components/PrintSheets'
@@ -101,7 +102,7 @@ export default function RecordsPage() {
     setPrintQueue(filtered)
   }
 
-  const editableFields = template.fields.filter((f) => f.staticValue === null)
+  const editableFields = template.fields.filter((f) => !hasStaticValue(f))
 
   const columns = [
     ...template.fields.map((f) => ({

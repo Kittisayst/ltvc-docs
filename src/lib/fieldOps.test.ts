@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addField, moveField, removeField, updateField } from './fieldOps'
+import { addField, hasStaticValue, moveField, removeField, updateField } from './fieldOps'
 import type { FieldDef } from './types'
 
 function makeField(overrides: Partial<FieldDef> = {}): FieldDef {
@@ -68,6 +68,22 @@ describe('removeField', () => {
     const fields = [makeField({ id: 'a' }), makeField({ id: 'b' })]
     const updated = removeField(fields, 'a')
     expect(updated.map((f) => f.id)).toEqual(['b'])
+  })
+})
+
+describe('hasStaticValue', () => {
+  it('is false when staticValue is null', () => {
+    expect(hasStaticValue(makeField({ staticValue: null }))).toBe(false)
+  })
+
+  it('is false for fields saved before staticValue existed (undefined)', () => {
+    const legacyField = { ...makeField(), staticValue: undefined } as unknown as FieldDef
+    expect(hasStaticValue(legacyField)).toBe(false)
+  })
+
+  it('is true once a static value (even an empty string) is set', () => {
+    expect(hasStaticValue(makeField({ staticValue: '' }))).toBe(true)
+    expect(hasStaticValue(makeField({ staticValue: 'ພະແນກ ໄອທີ' }))).toBe(true)
   })
 })
 

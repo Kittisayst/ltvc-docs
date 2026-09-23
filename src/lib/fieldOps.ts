@@ -27,6 +27,17 @@ export function removeField(fields: FieldDef[], id: string): FieldDef[] {
   return fields.filter((f) => f.id !== id)
 }
 
+/**
+ * True only when the field actually carries a static value. Templates
+ * saved before staticValue existed have it `undefined`, not `null` —
+ * so this must treat both as "off" rather than comparing to null alone.
+ */
+export function hasStaticValue(
+  field: FieldDef,
+): field is FieldDef & { staticValue: string } {
+  return field.staticValue != null
+}
+
 export function moveField(
   fields: FieldDef[],
   id: string,

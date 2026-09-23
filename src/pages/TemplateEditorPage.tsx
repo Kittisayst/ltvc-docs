@@ -13,7 +13,7 @@ import {
 } from 'antd'
 import { PlusOutlined, ScissorOutlined, UploadOutlined } from '@ant-design/icons'
 import { db, saveTemplate, addFont } from '../lib/db'
-import { addField, moveField, removeField, updateField } from '../lib/fieldOps'
+import { addField, hasStaticValue, moveField, removeField, updateField } from '../lib/fieldOps'
 import { ensureFontRegistered } from '../lib/fonts'
 import { PAGE_HEIGHT_MM, PAGE_WIDTH_MM, pxPerMmFromContainer } from '../lib/units'
 import DraggableField from '../components/DraggableField'
@@ -219,7 +219,7 @@ export default function TemplateEditorPage() {
               </label>
               <label className="flex items-center gap-2">
                 <Switch
-                  checked={selectedField.staticValue !== null}
+                  checked={hasStaticValue(selectedField)}
                   onChange={(checked) =>
                     handleFieldPatch(selectedField.id, {
                       staticValue: checked ? '' : null,
@@ -228,7 +228,7 @@ export default function TemplateEditorPage() {
                 />
                 ຄ່າຄົງທີ່ (ຂໍ້ຄວາມຄືກັນທຸກໃບ)
               </label>
-              {selectedField.staticValue !== null && (
+              {hasStaticValue(selectedField) && (
                 <label className="flex flex-col gap-1">
                   ຂໍ້ຄວາມ
                   <Input
