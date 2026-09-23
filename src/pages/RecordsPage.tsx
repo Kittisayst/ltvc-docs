@@ -10,7 +10,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import { PlusOutlined, PrinterOutlined, SearchOutlined } from '@ant-design/icons'
+import { EditOutlined, PlusOutlined, PrinterOutlined, SearchOutlined } from '@ant-design/icons'
 import { db, saveRecord, deleteRecord as removeRecordFromDb } from '../lib/db'
 import { hasStaticValue } from '../lib/fieldOps'
 import { createDraftRecord, filterRecords, markPrinted } from '../lib/records'
@@ -142,7 +142,14 @@ export default function RecordsPage() {
       <Space className="mb-2">
         <Link to="/">← ແບບຟອມທັງໝົດ</Link>
       </Space>
-      <Typography.Title level={2}>{template.name}</Typography.Title>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <Typography.Title level={2} className="m-0!">
+          {template.name}
+        </Typography.Title>
+        <Link to={`/templates/${template.id}/edit`}>
+          <Button icon={<EditOutlined />}>ໄປໜ້າອອກແບບ</Button>
+        </Link>
+      </div>
 
       <div className="mb-4 flex flex-col gap-3 rounded-lg border border-gray-200 p-4">
         <Typography.Title level={4} className="m-0!">

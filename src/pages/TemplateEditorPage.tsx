@@ -17,6 +17,7 @@ import {
   AlignLeftOutlined,
   AlignRightOutlined,
   BoldOutlined,
+  FormOutlined,
   ItalicOutlined,
   PlusOutlined,
   ScissorOutlined,
@@ -154,7 +155,16 @@ export default function TemplateEditorPage() {
       <Space className="mb-2">
         <Link to="/">← ແບບຟອມທັງໝົດ</Link>
       </Space>
-      <Typography.Title level={2}>{template.name}</Typography.Title>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <Typography.Title level={2} className="m-0!">
+          {template.name}
+        </Typography.Title>
+        <Link to={`/templates/${template.id}/records`}>
+          <Button type="primary" icon={<FormOutlined />}>
+            ໄປໜ້າປ້ອນຂໍ້ມູນ/ພິມ
+          </Button>
+        </Link>
+      </div>
 
       <Space wrap className="mb-4">
         <Button icon={<UploadOutlined />}>
