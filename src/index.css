@@ -40,7 +40,10 @@ body {
   width: 297mm;
   height: 210mm;
   position: relative;
-  page-break-after: always;
+}
+
+.print-sheet + .print-sheet {
+  page-break-before: always;
 }
 
 .print-field {
