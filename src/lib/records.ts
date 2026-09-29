@@ -1,4 +1,6 @@
-import type { CertRecord } from './types'
+import type { CertRecord, RecordStatus } from './types'
+
+export type StatusFilter = 'all' | RecordStatus
 
 export function createDraftRecord(
   templateId: string,
@@ -20,6 +22,14 @@ export function markPrinted(record: CertRecord): CertRecord {
 
 export function unmarkPrinted(record: CertRecord): CertRecord {
   return { ...record, status: 'draft', printedAt: null }
+}
+
+export function filterByStatus(
+  records: CertRecord[],
+  status: StatusFilter,
+): CertRecord[] {
+  if (status === 'all') return records
+  return records.filter((r) => r.status === status)
 }
 
 export function filterRecords(

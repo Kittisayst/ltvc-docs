@@ -6,6 +6,7 @@ import {
   Checkbox,
   Input,
   Popconfirm,
+  Segmented,
   Space,
   Table,
   Typography,
@@ -21,7 +22,14 @@ import {
 } from '@ant-design/icons'
 import { db, saveRecord, deleteRecord as removeRecordFromDb } from '../lib/db'
 import { hasStaticValue } from '../lib/fieldOps'
-import { createDraftRecord, filterRecords, markPrinted, unmarkPrinted } from '../lib/records'
+import {
+  createDraftRecord,
+  filterByStatus,
+  filterRecords,
+  markPrinted,
+  unmarkPrinted,
+  type StatusFilter,
+} from '../lib/records'
 import { ensureFontRegistered } from '../lib/fonts'
 import { buildCertificatePdf } from '../lib/pdf'
 import PrintSheets from '../components/PrintSheets'
@@ -42,6 +50,7 @@ export default function RecordsPage() {
   const [formValues, setFormValues] = useState<Record<string, string>>({})
   const [editingId, setEditingId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [printQueue, setPrintQueue] = useState<CertRecord[] | null>(null)
   const [fontFamilies, setFontFamilies] = useState<Record<string, string>>({})
   const [pdfLoading, setPdfLoading] = useState(false)
@@ -76,7 +85,7 @@ export default function RecordsPage() {
 
   if (!template || !records) return <div className="p-6">ກຳລັງໂຫຼດ...</div>
 
-  const filtered = filterRecords(records, query)
+  const filtered = filterByStatus(filterRecords(records, query), statusFilter)
 
   function handleFieldInput(fieldId: string, value: string) {
     setFormValues((prev) => ({ ...prev, [fieldId]: value }))
@@ -249,6 +258,16 @@ export default function RecordsPage() {
           <Button icon={<ClearOutlined />}>ລ້າງທັງໝົດ</Button>
         </Popconfirm>
       </Space>
+
+      <Segmented
+        className="mb-3"
+        value={statusFilter}
+        onChange={(v) => setStatusFilter(v as StatusFilter)}
+        options={[
+          { label: 'ສະແດງທັງໝົດ', value: 'all' },
+          { label: 'ພິມແລ້ວ', value: 'printed' },
+        ]}
+      />
 
       <Table
         rowKey="id"

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { createDraftRecord, filterRecords, markPrinted, unmarkPrinted } from './records'
+import {
+  createDraftRecord,
+  filterByStatus,
+  filterRecords,
+  markPrinted,
+  unmarkPrinted,
+} from './records'
 import type { CertRecord } from './types'
 
 describe('createDraftRecord', () => {
@@ -41,6 +47,34 @@ describe('unmarkPrinted', () => {
     const printed = markPrinted(createDraftRecord('tpl-1', {}))
     unmarkPrinted(printed)
     expect(printed.status).toBe('printed')
+  })
+})
+
+describe('filterByStatus', () => {
+  const base: CertRecord = {
+    id: '1',
+    templateId: 'tpl-1',
+    values: {},
+    status: 'printed',
+    createdAt: 1000,
+    printedAt: 1000,
+  }
+  const records: CertRecord[] = [
+    base,
+    { ...base, id: '2', status: 'draft', printedAt: null },
+    { ...base, id: '3', status: 'draft', printedAt: null },
+  ]
+
+  it('returns every record for "all"', () => {
+    expect(filterByStatus(records, 'all')).toHaveLength(3)
+  })
+
+  it('returns only printed records for "printed"', () => {
+    expect(filterByStatus(records, 'printed').map((r) => r.id)).toEqual(['1'])
+  })
+
+  it('returns only draft records for "draft"', () => {
+    expect(filterByStatus(records, 'draft').map((r) => r.id)).toEqual(['2', '3'])
   })
 })
 
