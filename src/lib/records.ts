@@ -18,6 +18,10 @@ export function markPrinted(record: CertRecord): CertRecord {
   return { ...record, status: 'printed', printedAt: Date.now() }
 }
 
+export function unmarkPrinted(record: CertRecord): CertRecord {
+  return { ...record, status: 'draft', printedAt: null }
+}
+
 export function filterRecords(
   records: CertRecord[],
   query: string,

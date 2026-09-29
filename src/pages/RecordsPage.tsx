@@ -3,18 +3,27 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Link, useParams } from 'react-router-dom'
 import {
   Button,
+  Checkbox,
   Input,
   Popconfirm,
   Space,
   Table,
-  Tag,
   Typography,
+  message,
 } from 'antd'
-import { EditOutlined, PlusOutlined, PrinterOutlined, SearchOutlined } from '@ant-design/icons'
+import {
+  ClearOutlined,
+  EditOutlined,
+  FilePdfOutlined,
+  PlusOutlined,
+  PrinterOutlined,
+  SearchOutlined,
+} from '@ant-design/icons'
 import { db, saveRecord, deleteRecord as removeRecordFromDb } from '../lib/db'
 import { hasStaticValue } from '../lib/fieldOps'
-import { createDraftRecord, filterRecords, markPrinted } from '../lib/records'
+import { createDraftRecord, filterRecords, markPrinted, unmarkPrinted } from '../lib/records'
 import { ensureFontRegistered } from '../lib/fonts'
+import { buildCertificatePdf } from '../lib/pdf'
 import PrintSheets from '../components/PrintSheets'
 import type { CertRecord } from '../lib/types'
 
@@ -35,6 +44,7 @@ export default function RecordsPage() {
   const [query, setQuery] = useState('')
   const [printQueue, setPrintQueue] = useState<CertRecord[] | null>(null)
   const [fontFamilies, setFontFamilies] = useState<Record<string, string>>({})
+  const [pdfLoading, setPdfLoading] = useState(false)
 
   useEffect(() => {
     if (!fonts) return
@@ -102,6 +112,32 @@ export default function RecordsPage() {
     setPrintQueue(filtered)
   }
 
+  async function handleToggleStatus(record: CertRecord, printed: boolean) {
+    await saveRecord(printed ? markPrinted(record) : unmarkPrinted(record))
+  }
+
+  async function handleClearStatus() {
+    await Promise.all(filtered.map((r) => saveRecord(unmarkPrinted(r))))
+  }
+
+  async function handleDownloadPdf() {
+    if (!template || filtered.length === 0) return
+    setPdfLoading(true)
+    try {
+      const blob = await buildCertificatePdf(template, filtered, fonts ?? [])
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${template.name}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      message.error('ສ້າງ PDF ບໍ່ສຳເລັດ')
+    } finally {
+      setPdfLoading(false)
+    }
+  }
+
   const editableFields = template.fields.filter((f) => !hasStaticValue(f))
 
   const columns = [
@@ -111,10 +147,14 @@ export default function RecordsPage() {
       render: (_: unknown, r: CertRecord) => f.staticValue ?? r.values[f.id],
     })),
     {
-      title: 'ສະຖານະ',
+      title: 'ພິມແລ້ວ',
       key: 'status',
-      render: (_: unknown, r: CertRecord) =>
-        r.status === 'printed' ? <Tag color="green">ພິມແລ້ວ</Tag> : <Tag>ຮ່າງ</Tag>,
+      render: (_: unknown, r: CertRecord) => (
+        <Checkbox
+          checked={r.status === 'printed'}
+          onChange={(e) => handleToggleStatus(r, e.target.checked)}
+        />
+      ),
     },
     {
       title: '',
@@ -197,6 +237,17 @@ export default function RecordsPage() {
         <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrintAll}>
           ພິມທັງໝົດ ({filtered.length})
         </Button>
+        <Button icon={<FilePdfOutlined />} loading={pdfLoading} onClick={handleDownloadPdf}>
+          ດາວໂຫລດ PDF
+        </Button>
+        <Popconfirm
+          title={`ລ້າງສະຖານະ "ພິມແລ້ວ" ຂອງ ${filtered.length} ລາຍການນີ້?`}
+          okText="ລ້າງ"
+          cancelText="ຍົກເລີກ"
+          onConfirm={handleClearStatus}
+        >
+          <Button icon={<ClearOutlined />}>ລ້າງທັງໝົດ</Button>
+        </Popconfirm>
       </Space>
 
       <Table

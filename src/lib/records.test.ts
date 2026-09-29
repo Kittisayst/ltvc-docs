@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createDraftRecord, filterRecords, markPrinted } from './records'
+import { createDraftRecord, filterRecords, markPrinted, unmarkPrinted } from './records'
 import type { CertRecord } from './types'
 
 describe('createDraftRecord', () => {
@@ -26,6 +26,21 @@ describe('markPrinted', () => {
     markPrinted(draft)
     expect(draft.status).toBe('draft')
     expect(draft.printedAt).toBeNull()
+  })
+})
+
+describe('unmarkPrinted', () => {
+  it('reverts a printed record back to draft, clearing printedAt', () => {
+    const printed = markPrinted(createDraftRecord('tpl-1', {}))
+    const reverted = unmarkPrinted(printed)
+    expect(reverted.status).toBe('draft')
+    expect(reverted.printedAt).toBeNull()
+  })
+
+  it('does not mutate the original record', () => {
+    const printed = markPrinted(createDraftRecord('tpl-1', {}))
+    unmarkPrinted(printed)
+    expect(printed.status).toBe('printed')
   })
 })
 

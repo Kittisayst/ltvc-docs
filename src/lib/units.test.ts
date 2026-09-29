@@ -10,6 +10,7 @@ import {
   pxPerMmFromContainer,
   pxToMm,
   remainingWidthMm,
+  textAnchorXMm,
 } from './units'
 
 describe('mmToPx / pxToMm', () => {
@@ -92,6 +93,20 @@ describe('clampZoom', () => {
 
   it('clamps above the maximum zoom', () => {
     expect(clampZoom(100)).toBeLessThanOrEqual(3)
+  })
+})
+
+describe('textAnchorXMm', () => {
+  it('anchors left-aligned text at the box left edge', () => {
+    expect(textAnchorXMm(20, 100, 'left')).toBe(20)
+  })
+
+  it('anchors center-aligned text at the box midpoint', () => {
+    expect(textAnchorXMm(20, 100, 'center')).toBe(70)
+  })
+
+  it('anchors right-aligned text at the box right edge', () => {
+    expect(textAnchorXMm(20, 100, 'right')).toBe(120)
   })
 })
 
