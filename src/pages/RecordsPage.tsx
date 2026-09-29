@@ -265,7 +265,7 @@ export default function RecordsPage() {
         onChange={(v) => setStatusFilter(v as StatusFilter)}
         options={[
           { label: 'ສະແດງທັງໝົດ', value: 'all' },
-          { label: 'ພິມແລ້ວ', value: 'printed' },
+          { label: 'ຍັງບໍ່ໄດ້ພິມ', value: 'draft' },
         ]}
       />
 
