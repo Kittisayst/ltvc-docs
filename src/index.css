@@ -16,26 +16,6 @@ body {
   margin: 0;
 }
 
-.print-area {
-  display: none;
-}
-
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  .print-area,
-  .print-area * {
-    visibility: visible;
-  }
-  .print-area {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-}
-
 .print-sheet {
   width: 297mm;
   height: 210mm;

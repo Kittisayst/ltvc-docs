@@ -10,7 +10,7 @@ interface Props {
 
 export default function PrintSheets({ template, records, fontFamilies }: Props) {
   return (
-    <div className="print-area">
+    <div>
       {records.map((record) => (
         <div key={record.id} className="print-sheet">
           {template.fields.map((field) => (

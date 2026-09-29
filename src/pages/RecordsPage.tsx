@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useReactToPrint, type UseReactToPrintOptions } from 'react-to-print'
 import { Link, useParams } from 'react-router-dom'
 import {
   Button,
@@ -30,7 +31,8 @@ import {
   unmarkPrinted,
   type StatusFilter,
 } from '../lib/records'
-import { ensureFontRegistered } from '../lib/fonts'
+import { arrayBufferToBase64 } from '../lib/binary'
+import { DEFAULT_FONT_NAME, fontFamilyFor, loadDefaultFontBuffer } from '../lib/fonts'
 import { buildCertificatePdf } from '../lib/pdf'
 import PrintSheets from '../components/PrintSheets'
 import type { CertRecord } from '../lib/types'
@@ -52,36 +54,58 @@ export default function RecordsPage() {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [printQueue, setPrintQueue] = useState<CertRecord[] | null>(null)
-  const [fontFamilies, setFontFamilies] = useState<Record<string, string>>({})
+  const [printFonts, setPrintFonts] = useState<UseReactToPrintOptions['fonts']>([])
   const [pdfLoading, setPdfLoading] = useState(false)
+  const printRef = useRef<HTMLDivElement>(null)
 
+  // Font faces for the print iframe react-to-print spins up: it's a fresh
+  // document, so it doesn't inherit fonts registered on window.document via
+  // ensureFontRegistered (used for the on-screen editor canvas) - these are
+  // handed to the hook instead, which registers them inside that iframe.
   useEffect(() => {
-    if (!fonts) return
-    fonts.forEach((f) => {
-      ensureFontRegistered(f).then((family) =>
-        setFontFamilies((prev) => ({ ...prev, [f.id]: family })),
+    let cancelled = false
+    function toFontSource(buffer: ArrayBuffer) {
+      return `url(data:font/ttf;base64,${arrayBufferToBase64(buffer)})`
+    }
+    async function loadFonts() {
+      const defaultBuffer = await loadDefaultFontBuffer()
+      const uploaded = await Promise.all(
+        (fonts ?? []).map(async (f) => ({
+          family: fontFamilyFor(f),
+          source: toFontSource(await f.blob.arrayBuffer()),
+        })),
       )
-    })
+      if (!cancelled) {
+        setPrintFonts([
+          { family: DEFAULT_FONT_NAME, source: toFontSource(defaultBuffer) },
+          ...uploaded,
+        ])
+      }
+    }
+    loadFonts()
+    return () => {
+      cancelled = true
+    }
   }, [fonts])
 
-  useEffect(() => {
-    if (!printQueue) return
-    const timer = setTimeout(() => window.print(), 100)
-    return () => clearTimeout(timer)
-  }, [printQueue])
-
-  useEffect(() => {
-    function handleAfterPrint() {
+  const triggerPrint = useReactToPrint({
+    contentRef: printRef,
+    fonts: printFonts,
+    documentTitle: template?.name ?? 'certificate',
+    onAfterPrint: () => {
       setPrintQueue((queue) => {
         if (queue) {
           Promise.all(queue.map((r) => saveRecord(markPrinted(r))))
         }
         return null
       })
-    }
-    window.addEventListener('afterprint', handleAfterPrint)
-    return () => window.removeEventListener('afterprint', handleAfterPrint)
-  }, [])
+    },
+  })
+
+  useEffect(() => {
+    if (printQueue) triggerPrint()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [printQueue])
 
   if (!template || !records) return <div className="p-6">ກຳລັງໂຫຼດ...</div>
 
@@ -148,6 +172,7 @@ export default function RecordsPage() {
   }
 
   const editableFields = template.fields.filter((f) => !hasStaticValue(f))
+  const fontFamilies = Object.fromEntries((fonts ?? []).map((f) => [f.id, fontFamilyFor(f)]))
 
   const columns = [
     ...template.fields.map((f) => ({
@@ -276,9 +301,11 @@ export default function RecordsPage() {
         pagination={false}
       />
 
-      {printQueue && (
-        <PrintSheets template={template} records={printQueue} fontFamilies={fontFamilies} />
-      )}
+      <div style={{ display: 'none' }}>
+        <div ref={printRef}>
+          <PrintSheets template={template} records={printQueue ?? []} fontFamilies={fontFamilies} />
+        </div>
+      </div>
     </div>
   )
 }

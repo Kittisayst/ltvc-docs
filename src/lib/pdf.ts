@@ -1,19 +1,12 @@
 import { jsPDF } from 'jspdf'
+import { arrayBufferToBase64 } from './binary'
 import { hexToRgb } from './color'
+import { loadDefaultFontBuffer } from './fonts'
 import { fieldBoxWidthMm, textAnchorXMm } from './units'
 import type { CertRecord, FontAsset, Template } from './types'
 
-const DEFAULT_FONT_NAME = 'PhetsarathOT'
-const DEFAULT_FONT_URL = `${import.meta.env.BASE_URL}fonts/PhetsarathOT.ttf`
+const PDF_DEFAULT_FONT_NAME = 'PhetsarathOT'
 const EMBEDDABLE_FORMATS = new Set(['ttf', 'otf', 'truetype', 'opentype'])
-
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  let binary = ''
-  for (const byte of new Uint8Array(buffer)) {
-    binary += String.fromCharCode(byte)
-  }
-  return btoa(binary)
-}
 
 async function embedFont(doc: jsPDF, vfsName: string, pdfFontName: string, buffer: ArrayBuffer) {
   const base64 = arrayBufferToBase64(buffer)
@@ -43,8 +36,8 @@ export async function buildCertificatePdf(
 ): Promise<Blob> {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
 
-  const defaultFontBuffer = await fetch(DEFAULT_FONT_URL).then((r) => r.arrayBuffer())
-  await embedFont(doc, 'PhetsarathOT.ttf', DEFAULT_FONT_NAME, defaultFontBuffer)
+  const defaultFontBuffer = await loadDefaultFontBuffer()
+  await embedFont(doc, 'PhetsarathOT.ttf', PDF_DEFAULT_FONT_NAME, defaultFontBuffer)
 
   const pdfFontNameByFieldFontId = new Map<string, string>()
   for (const font of fonts) {
@@ -67,7 +60,7 @@ export async function buildCertificatePdf(
       if (!text) continue
 
       const fontName =
-        (field.fontId && pdfFontNameByFieldFontId.get(field.fontId)) || DEFAULT_FONT_NAME
+        (field.fontId && pdfFontNameByFieldFontId.get(field.fontId)) || PDF_DEFAULT_FONT_NAME
       doc.setFont(fontName, 'normal')
       doc.setFontSize(field.fontSizePt)
       doc.setTextColor(...hexToRgb(field.color))
